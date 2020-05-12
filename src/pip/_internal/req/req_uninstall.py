@@ -86,12 +86,12 @@ def uninstallation_paths(dist):
     for row in r:
         path = os.path.join(dist.location, row[0])
         yield path
-        if path.endswith('.py'):
+        if path.endswith(os.extsep+'py'):
             dn, fn = os.path.split(path)
             base = fn[:-3]
-            path = os.path.join(dn, base + '.pyc')
+            path = os.path.join(dn, base + os.extsep+'pyc')
             yield path
-            path = os.path.join(dn, base + '.pyo')
+            path = os.path.join(dn, base + os.extsep+'pyo')
             yield path
 
 
@@ -174,9 +174,10 @@ def compress_for_output_listing(paths):
     folders = set()
     files = set()
     for path in will_remove:
-        if path.endswith(".pyc"):
+        if path.endswith(os.extsep+"pyc"):
             continue
-        if path.endswith("__init__.py") or ".dist-info" in path:
+        if path.endswith("__init__"+os.extsep+"py") \
+          or os.extsep+"dist-info" in path:
             folders.add(os.path.dirname(path))
         files.add(path)
 
@@ -190,7 +191,7 @@ def compress_for_output_listing(paths):
     for folder in folders:
         for dirpath, _, dirfiles in os.walk(folder):
             for fname in dirfiles:
-                if fname.endswith(".pyc"):
+                if fname.endswith(os.extsep+"pyc"):
                     continue
 
                 file_ = os.path.join(dirpath, fname)
@@ -354,7 +355,7 @@ class UninstallPathSet(object):
 
         # __pycache__ files can show up after 'installed-files.txt' is created,
         # due to imports
-        if os.path.splitext(path)[1] == '.py' and uses_pycache:
+        if os.path.splitext(path)[1] == os.extsep+'py' and uses_pycache:
             self.add(cache_from_source(path))
 
     def add_pth(self, pth_file, entry):
@@ -474,15 +475,15 @@ class UninstallPathSet(object):
 
         paths_to_remove = cls(dist)
         develop_egg_link = egg_link_path(dist)
-        develop_egg_link_egg_info = '{}.egg-info'.format(
-            pkg_resources.to_filename(dist.project_name))
+        develop_egg_link_egg_info = '{}{}egg-info'.format(
+            pkg_resources.to_filename(dist.project_name), os.extsep)
         egg_info_exists = dist.egg_info and os.path.exists(dist.egg_info)
         # Special case for distutils installed package
         distutils_egg_info = getattr(dist._provider, 'path', None)
 
         # Uninstall cases order do matter as in the case of 2 installs of the
         # same package, pip needs to uninstall the currently detected version
-        if (egg_info_exists and dist.egg_info.endswith('.egg-info') and
+        if (egg_info_exists and dist.egg_info.endswith(os.extsep+'egg-info') and
                 not dist.egg_info.endswith(develop_egg_link_egg_info)):
             # if dist.egg_info.endswith(develop_egg_link_egg_info), we
             # are in fact in the develop_egg_link case
@@ -508,9 +509,9 @@ class UninstallPathSet(object):
                         if p and p not in namespaces]:
                     path = os.path.join(dist.location, top_level_pkg)
                     paths_to_remove.add(path)
-                    paths_to_remove.add(path + '.py')
-                    paths_to_remove.add(path + '.pyc')
-                    paths_to_remove.add(path + '.pyo')
+                    paths_to_remove.add(path + os.extsep+'py')
+                    paths_to_remove.add(path + os.extsep+'pyc')
+                    paths_to_remove.add(path + os.extsep+'pyo')
 
         elif distutils_egg_info:
             raise UninstallationError(
@@ -521,17 +522,18 @@ class UninstallPathSet(object):
                 )
             )
 
-        elif dist.location.endswith('.egg'):
+        elif dist.location.endswith(os.extsep+'egg'):
             # package installed by easy_install
             # We cannot match on dist.egg_name because it can slightly vary
             # i.e. setuptools-0.6c11-py2.6.egg vs setuptools-0.6rc11-py2.6.egg
             paths_to_remove.add(dist.location)
             easy_install_egg = os.path.split(dist.location)[1]
             easy_install_pth = os.path.join(os.path.dirname(dist.location),
-                                            'easy-install.pth')
+                                            f'easy-install{os.extsep}pth')
+            ## CMJ **FIXME**
             paths_to_remove.add_pth(easy_install_pth, './' + easy_install_egg)
 
-        elif egg_info_exists and dist.egg_info.endswith('.dist-info'):
+        elif egg_info_exists and dist.egg_info.endswith(os.extsep+'dist-info'):
             for path in uninstallation_paths(dist):
                 paths_to_remove.add(path)
 
@@ -545,7 +547,7 @@ class UninstallPathSet(object):
             )
             paths_to_remove.add(develop_egg_link)
             easy_install_pth = os.path.join(os.path.dirname(develop_egg_link),
-                                            'easy-install.pth')
+                                            f'easy-install{os.extsep}pth')
             paths_to_remove.add_pth(easy_install_pth, dist.location)
 
         else:

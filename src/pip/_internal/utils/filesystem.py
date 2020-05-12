@@ -93,14 +93,15 @@ def adjacent_tmp_file(path):
         delete=False,
         dir=os.path.dirname(path),
         prefix=os.path.basename(path),
-        suffix='.tmp',
+        suffix=os.extsep+'tmp',
     ) as f:
         result = cast('NamedTemporaryFileResult', f)
         try:
             yield result
         finally:
             result.file.flush()
-            os.fsync(result.file.fileno())
+            if 'fsync' in os.__dict__:
+                os.fsync(result.file.fileno())
 
 
 _replace_retry = retry(stop_max_delay=1000, wait_fixed=250)

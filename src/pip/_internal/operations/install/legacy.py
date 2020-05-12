@@ -46,9 +46,12 @@ def install(
         install_req.options.get('install_options', [])
 
     header_dir = scheme.headers
+    if os.name == 'riscos':
+        header_dir = os.path.canonicalise(header_dir)
 
     with TempDirectory(kind="record") as temp_dir:
-        record_filename = os.path.join(temp_dir.path, 'install-record.txt')
+        record_filename = os.path.join(temp_dir.path,
+                                       f'install-record{os.extsep}txt')
         install_args = make_setuptools_install_args(
             install_req.setup_py_path,
             global_options=global_options,
@@ -92,7 +95,7 @@ def install(
 
     for line in record_lines:
         directory = os.path.dirname(line)
-        if directory.endswith('.egg-info'):
+        if directory.endswith(os.extsep+'egg-info'):
             egg_info_dir = prepend_root(directory)
             break
     else:
@@ -124,6 +127,7 @@ def install(
         )
     new_lines.sort()
     ensure_dir(egg_info_dir)
-    inst_files_path = os.path.join(egg_info_dir, 'installed-files.txt')
+    inst_files_path = os.path.join(egg_info_dir,
+                                   f'installed-files{os.extsep}txt')
     with open(inst_files_path, 'w') as f:
         f.write('\n'.join(new_lines) + '\n')

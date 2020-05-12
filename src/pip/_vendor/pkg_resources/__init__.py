@@ -1446,7 +1446,7 @@ class NullProvider:
         return []
 
     def run_script(self, script_name, namespace):
-        script = 'scripts/' + script_name
+        script = os.path.join('scripts', script_name)
         if not self.has_metadata(script):
             raise ResolutionError(
                 "Script {script!r} not found in metadata at {self.egg_info!r}"
@@ -1486,7 +1486,10 @@ class NullProvider:
     def _fn(self, base, resource_name):
         self._validate_resource_path(resource_name)
         if resource_name:
-            return os.path.join(base, *resource_name.split('/'))
+            parts = resource_name.split('/')
+            fn = parts[-1].replace('.', os.extsep)
+            return os.path.join(base, *parts[:-1], fn
+            )
         return base
 
     @staticmethod
@@ -2071,14 +2074,15 @@ def dist_factory(path_item, entry, only):
     Return a dist_factory for a path_item and entry
     """
     lower = entry.lower()
-    is_meta = any(map(lower.endswith, ('.egg-info', '.dist-info')))
+    is_meta = any(map(lower.endswith,
+            (os.extsep+'egg-info', os.extsep+'dist-info')))
     return (
         distributions_from_metadata
         if is_meta else
         find_distributions
         if not only and _is_egg_path(entry) else
         resolve_egg_link
-        if not only and lower.endswith('.egg-link') else
+        if not only and lower.endswith(os.extsep+'egg-link') else
         NoDists()
     )
 
@@ -2354,7 +2358,7 @@ def _is_egg_path(path):
     """
     Determine if given path appears to be an egg.
     """
-    return path.lower().endswith('.egg')
+    return path.lower().endswith(os.extsep+'egg')
 
 
 def _is_unpacked_egg(path):
@@ -2581,7 +2585,6 @@ class Distribution:
         basename, ext = os.path.splitext(basename)
         if ext.lower() in _distributionImpl:
             cls = _distributionImpl[ext.lower()]
-
             match = EGG_NAME(basename)
             if match:
                 project_name, version, py_version, platform = match.group(
@@ -2857,7 +2860,7 @@ class Distribution:
             ep_map = self._ep_map
         except AttributeError:
             ep_map = self._ep_map = EntryPoint.parse_map(
-                self._get_metadata('entry_points.txt'), self
+                self._get_metadata(f'entry_points.txt'), self
             )
         if group is not None:
             return ep_map.get(group, {})
@@ -3048,9 +3051,9 @@ class DistInfoDistribution(Distribution):
 
 
 _distributionImpl = {
-    '.egg': Distribution,
-    '.egg-info': EggInfoDistribution,
-    '.dist-info': DistInfoDistribution,
+    os.extsep+'egg': Distribution,
+    os.extsep+'egg-info': EggInfoDistribution,
+    os.extsep+'dist-info': DistInfoDistribution,
 }
 
 

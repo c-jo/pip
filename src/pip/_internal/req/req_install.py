@@ -78,10 +78,10 @@ def _get_dist(metadata_directory):
     dist_dir = metadata_directory.rstrip(os.sep)
 
     # Determine the correct Distribution object type.
-    if dist_dir.endswith(".egg-info"):
+    if dist_dir.endswith(os.extsep+"egg-info"):
         dist_cls = pkg_resources.Distribution
     else:
-        assert dist_dir.endswith(".dist-info")
+        assert dist_dir.endswith(os.extsep+"dist-info")
         dist_cls = pkg_resources.DistInfoDistribution
 
     # Build a PathMetadata object, from path to metadata. :wink:
@@ -478,15 +478,17 @@ class InstallRequirement(object):
     @property
     def unpacked_source_directory(self):
         # type: () -> str
-        return os.path.join(
-            self.source_dir,
-            self.link and self.link.subdirectory_fragment or '')
+        if self.link and self.link.subdirectory_fragment:
+            return os.path.join(
+                self.source_dir,
+                self.link and self.link.subdirectory_fragment or '')
+        return self.source_dir
 
     @property
     def setup_py_path(self):
         # type: () -> str
         assert self.source_dir, "No source dir for %s" % self
-        setup_py = os.path.join(self.unpacked_source_directory, 'setup.py')
+        setup_py = os.path.join(self.unpacked_source_directory, 'setup'+os.extsep+'py')
 
         # Python2 __file__ should not be unicode
         if six.PY2 and isinstance(setup_py, six.text_type):

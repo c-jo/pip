@@ -298,7 +298,12 @@ def _download_http_url(
     """Download link url into temp_dir using provided session"""
     download = downloader(link)
 
-    file_path = os.path.join(temp_dir, download.filename)
+    if sys.platform == 'riscos':
+        file_path = os.path.join(
+            temp_dir, download.filename.translate(str.maketrans('./','/.')))
+    else:
+        file_path = os.path.join(temp_dir, download.filename)
+
     with open(file_path, 'wb') as content_file:
         for chunk in download.chunks:
             content_file.write(chunk)

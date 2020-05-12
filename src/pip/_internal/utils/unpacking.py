@@ -13,6 +13,7 @@ import shutil
 import stat
 import tarfile
 import zipfile
+import sys
 
 from pip._internal.exceptions import InstallationError
 from pip._internal.utils.filetypes import (
@@ -160,14 +161,17 @@ def untar_file(filename, location):
     written.  Note that for windows, any execute changes using os.chmod are
     no-ops per the python docs.
     """
+    es = os.extsep
+
     ensure_dir(location)
-    if filename.lower().endswith('.gz') or filename.lower().endswith('.tgz'):
+    if filename.lower().endswith(es+'gz') or \
+       filename.lower().endswith(es+'tgz'):
         mode = 'r:gz'
     elif filename.lower().endswith(BZ2_EXTENSIONS):
         mode = 'r:bz2'
     elif filename.lower().endswith(XZ_EXTENSIONS):
         mode = 'r:xz'
-    elif filename.lower().endswith('.tar'):
+    elif filename.lower().endswith(es+'tar'):
         mode = 'r'
     else:
         logger.warning(
@@ -184,7 +188,12 @@ def untar_file(filename, location):
             if leading:
                 # https://github.com/python/mypy/issues/1174
                 fn = split_leading_dir(fn)[1]  # type: ignore
-            path = os.path.join(location, fn)
+
+            if sys.platform == 'riscos':
+                path = os.path.join(location,
+                                    fn.translate(str.maketrans('./','/.')))
+            else:
+                path = os.path.join(location,fn)
             if not is_within_directory(location, path):
                 message = (
                     'The tar file ({}) has a file ({}) trying to install '

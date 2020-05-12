@@ -1,4 +1,5 @@
 import os.path
+import os
 
 DELETE_MARKER_MESSAGE = '''\
 This file is placed here by pip to indicate the source was put
@@ -7,7 +8,7 @@ here by pip.
 Once this package is successfully installed this source code will be
 deleted (unless you remove this file).
 '''
-PIP_DELETE_MARKER_FILENAME = 'pip-delete-this-directory.txt'
+PIP_DELETE_MARKER_FILENAME = 'pip-delete-this-directory'+os.extsep+'txt'
 
 
 def has_delete_marker_file(directory):
