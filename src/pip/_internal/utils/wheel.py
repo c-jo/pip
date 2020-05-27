@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import
 
+import os
 import logging
 from email.parser import Parser
 from zipfile import ZipFile
@@ -64,7 +65,7 @@ def pkg_resources_distribution_for_wheel(wheel_zip, name, location):
     info_dir, _ = parse_wheel(wheel_zip, name)
 
     metadata_files = [
-        p for p in wheel_zip.namelist() if p.startswith("{}/".format(info_dir))
+        p for p in wheel_zip.namelist() if p.startswith(info_dir+os.sep)
     ]
 
     metadata_text = {}  # type: Dict[str, bytes]
@@ -74,7 +75,7 @@ def pkg_resources_distribution_for_wheel(wheel_zip, name, location):
         # of the code. This cannot fail because unicode can always be encoded
         # with UTF-8.
         full_path = ensure_str(path)
-        _, metadata_name = full_path.split("/", 1)
+        _, metadata_name = full_path.split(os.sep, 1)
 
         try:
             metadata_text[metadata_name] = read_wheel_metadata_file(
@@ -121,9 +122,9 @@ def wheel_dist_info_dir(source, name):
     it doesn't match the provided name.
     """
     # Zip file path separators must be /
-    subdirs = list(set(p.split("/")[0] for p in source.namelist()))
+    subdirs = list(set(p.split(os.sep)[0] for p in source.namelist()))
 
-    info_dirs = [s for s in subdirs if s.endswith('.dist-info')]
+    info_dirs = [s for s in subdirs if s.endswith(os.extsep+'dist-info')]
 
     if not info_dirs:
         raise UnsupportedWheel(".dist-info directory not found")
@@ -168,7 +169,7 @@ def wheel_metadata(source, dist_info_dir):
     """Return the WHEEL metadata of an extracted wheel, if possible.
     Otherwise, raise UnsupportedWheel.
     """
-    path = "{}/WHEEL".format(dist_info_dir)
+    path = "{}{}WHEEL".format(dist_info_dir, os.sep)
     # Zip file path separators must be /
     wheel_contents = read_wheel_metadata_file(source, path)
 

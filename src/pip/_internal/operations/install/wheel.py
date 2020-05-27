@@ -310,7 +310,10 @@ def install_unpacked_wheel(
     # TODO: Look into moving this into a dedicated class for representing an
     #       installation.
 
-    source = wheeldir.rstrip(os.path.sep) + os.path.sep
+    if sys.platform == 'riscos':
+        source = wheeldir.rstrip(os.path.sep)
+    else:
+        source = wheeldir.rstrip(os.path.sep) + os.path.sep
 
     info_dir, metadata = parse_wheel(wheel_zip, name)
 
@@ -320,7 +323,7 @@ def install_unpacked_wheel(
         lib_dir = scheme.platlib
 
     subdirs = os.listdir(source)
-    data_dirs = [s for s in subdirs if s.endswith('.data')]
+    data_dirs = [s for s in subdirs if s.endswith(os.extsep+'data')]
 
     # Record details of the files moved
     #   installed = files copied from the wheel to the destination
@@ -361,7 +364,7 @@ def install_unpacked_wheel(
             basedir = dir[len(source):].lstrip(os.path.sep)
             destdir = os.path.join(dest, basedir)
             if is_base and basedir == '':
-                subdirs[:] = [s for s in subdirs if not s.endswith('.data')]
+                subdirs[:] = [s for s in subdirs if not s.endswith(os.extsep+'data')]
             for f in files:
                 # Skip unwanted files
                 if filter and filter(f):
@@ -416,7 +419,7 @@ def install_unpacked_wheel(
     dest_info_dir = os.path.join(lib_dir, info_dir)
 
     # Get the defined entry points
-    ep_file = os.path.join(dest_info_dir, 'entry_points.txt')
+    ep_file = os.path.join(dest_info_dir, f'entry_points{os.extsep}txt')
     console, gui = get_entrypoints(ep_file)
 
     def is_entrypoint_wrapper(name):
@@ -567,7 +570,7 @@ def install_unpacked_wheel(
 
     # Record pip as the installer
     installer = os.path.join(dest_info_dir, 'INSTALLER')
-    temp_installer = os.path.join(dest_info_dir, 'INSTALLER.pip')
+    temp_installer = os.path.join(dest_info_dir, f'INSTALLER{os.extsep}pip')
     with open(temp_installer, 'wb') as installer_file:
         installer_file.write(b'pip\n')
     shutil.move(temp_installer, installer)
@@ -575,7 +578,7 @@ def install_unpacked_wheel(
 
     # Record details of all files installed
     record = os.path.join(dest_info_dir, 'RECORD')
-    temp_record = os.path.join(dest_info_dir, 'RECORD.pip')
+    temp_record = os.path.join(dest_info_dir, f'RECORD{os.extsep}pip')
     with open_for_csv(record, 'r') as record_in:
         with open_for_csv(temp_record, 'w+') as record_out:
             reader = csv.reader(record_in)

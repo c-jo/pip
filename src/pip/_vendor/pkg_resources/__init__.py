@@ -2860,7 +2860,7 @@ class Distribution:
             ep_map = self._ep_map
         except AttributeError:
             ep_map = self._ep_map = EntryPoint.parse_map(
-                self._get_metadata(f'entry_points.txt'), self
+                self._get_metadata(f'entry_points{os.extsep}txt'), self
             )
         if group is not None:
             return ep_map.get(group, {})

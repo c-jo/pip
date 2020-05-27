@@ -564,7 +564,7 @@ class InstalledDistribution(BaseInstalledDistribution):
 
         r = finder.find('REQUESTED')
         self.requested = r is not None
-        p  = os.path.join(path, 'top_level.txt')
+        p  = os.path.join(path, f'top_level{os.extsep}txt')
         if os.path.exists(p):
             with open(p, 'rb') as f:
                 data = f.read().decode('utf-8')
@@ -934,8 +934,8 @@ class EggInfoDistribution(BaseInstalledDistribution):
                 p = os.path.join(path, 'EGG-INFO')
                 meta_path = os.path.join(p, 'PKG-INFO')
                 metadata = Metadata(path=meta_path, scheme='legacy')
-                req_path = os.path.join(p, 'requires.txt')
-                tl_path = os.path.join(p, 'top_level.txt')
+                req_path = os.path.join(p, f'requires{os.extsep}txt')
+                tl_path = os.path.join(p, f'top_level{os.extsep}txt')
                 requires = parse_requires_path(req_path)
             else:
                 # FIXME handle the case where zipfile is not available
@@ -954,7 +954,7 @@ class EggInfoDistribution(BaseInstalledDistribution):
                 req_path = os.path.join(path, 'requires.txt')
                 requires = parse_requires_path(req_path)
                 path = os.path.join(path, 'PKG-INFO')
-                tl_path = os.path.join(path, 'top_level.txt')
+                tl_path = os.path.join(path, f'top_level{os.extsep}txt')
             metadata = Metadata(path=path, scheme='legacy')
         else:
             raise DistlibException('path must end with .egg-info or .egg, '
