@@ -18,6 +18,8 @@ from collections import deque
 from datetime import timedelta
 from math import ceil
 from sys import stderr
+import os
+
 try:
     from time import monotonic
 except ImportError:
@@ -26,8 +28,13 @@ except ImportError:
 
 __version__ = '1.5'
 
-HIDE_CURSOR = '\x1b[?25l'
-SHOW_CURSOR = '\x1b[?25h'
+
+if os.name == 'riscos':
+    HIDE_CURSOR = ''
+    SHOW_CURSOR = ''
+else:
+    HIDE_CURSOR = '\x1b[?25l'
+    SHOW_CURSOR = '\x1b[?25h'
 
 
 class Infinite(object):
@@ -86,7 +93,7 @@ class Infinite(object):
         pass
 
     def clearln(self):
-        if self.file and self.is_tty():
+        if self.file and self.is_tty() and os.name != 'riscos':
             print('\r\x1b[K', end='', file=self.file)
 
     def write(self, s):
