@@ -290,7 +290,7 @@ def user_cache_dir(appname=None, appauthor=None, version=None, opinion=True):
         Unix:       ~/.cache/<AppName> (XDG default)
         Win XP:     C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>\Cache
         Vista:      C:\Users\<username>\AppData\Local\<AppAuthor>\<AppName>\Cache
-        RISC OS:    <Wimp$ScrapDir>.<AppName>.Cache
+        RISC OS:    <Wimp$ScrapDir>.Cache.<AppName>
     On Windows the only suggestion in the MSDN docs is that local settings go in
     the `CSIDL_LOCAL_APPDATA` directory. This is identical to the non-roaming
     app data dir (the default returned by `user_data_dir` above). Apps typically
@@ -320,11 +320,9 @@ def user_cache_dir(appname=None, appauthor=None, version=None, opinion=True):
         if appname:
             path = os.path.join(path, appname)
     elif system == "riscos":
-        scrapdir = '<Wimp$ScrapDir>'
+        path = os.path.canonicalise('<Wimp$ScrapDir>.Cache')
         if appname:
-            path = os.path.join(scrapdir, appname, "Cache")
-        else:
-            path = os.path.join(scrapdir, "Cache")
+            path = os.path.join(path, appname)
     else:
         path = os.getenv('XDG_CACHE_HOME', os.path.expanduser('~/.cache'))
         if appname:
