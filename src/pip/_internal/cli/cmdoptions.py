@@ -189,7 +189,7 @@ no_color = partial(
     '--no-color',
     dest='no_color',
     action='store_true',
-    default=False,
+    default=True if os.name=='riscos' else False,
     help="Suppress colored output",
 )  # type: Callable[..., Option]
 
