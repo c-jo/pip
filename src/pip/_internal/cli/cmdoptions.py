@@ -220,7 +220,7 @@ progress_bar = partial(
     dest='progress_bar',
     type='choice',
     choices=list(BAR_TYPES.keys()),
-    default='on',
+    default='off' if os.name=='riscos' else 'on',
     help=(
         'Specify type of progress to be displayed [' +
         '|'.join(BAR_TYPES.keys()) + '] (default: %default)'

@@ -412,8 +412,6 @@ def _make_tarball(base_name, base_dir, compress="gzip", verbose=0, dry_run=0,
         logger.info('Creating tar archive')
 
 
-    import pdb ; pdb.set_trace()
-
     uid = _get_uid(owner)
     gid = _get_gid(group)
 

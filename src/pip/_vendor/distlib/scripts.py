@@ -47,6 +47,16 @@ if __name__ == '__main__':
     sys.exit(%(func)s())
 '''
 
+if os.name == 'riscos':
+    # A limited uncanonicalise - handles things under Python3$Path
+    # filename and return value are BYTES (not string)
+    def _uncanonicialise(filename):
+        p3_path = os.environ.get('Python3$Path',None)
+        if p3_path:
+            p3_path = p3_path.encode(sys.getfilesystemencoding())
+            if filename.lower().startswith(p3_path.lower()):
+                return b'Python3:' + filename[len(p3_path):]
+        return filename
 
 def _enquote_executable(executable):
     if ' ' in executable:
@@ -133,7 +143,9 @@ class ScriptMaker(object):
                   https://hg.mozilla.org/mozilla-central/file/tip/mach
         """
         if os.name == 'riscos':
-            return b"WimpSlot -min 8M\nRun " + executable + post_interp + b" -xxx {}\nObey\n"
+            return b"WimpSlot -Min 16M\nDo Run " + \
+                _uncanonicialise(executable) + post_interp + \
+                b" -xxx <Obey$Dir>.{}\nObey\n"
         if os.name != 'posix':
             simple_shebang = True
         else:
@@ -278,9 +290,16 @@ class ScriptMaker(object):
                     logger.warning('Skipping existing file %s', outname)
                     continue
                 if b'{}' in shebang:
-                    script_bytes = shebang.replace(
-                        b'{}', outname.encode( sys.getfilesystemencoding() ) \
-                        ) + script_bytes
+                    if os.name == 'riscos':
+                        script_bytes = shebang.replace( \
+                            b'{}', os.path.split(outname)[1].encode( \
+                            sys.getfilesystemencoding() ) \
+                            ) + script_bytes
+                    else:
+                        script_bytes = shebang.replace( \
+                            b'{}', outname.encode( \
+                            sys.getfilesystemencoding() ) \
+                            ) + script_bytes
                 self._fileop.write_binary_file(outname, script_bytes)
                 if os.name == 'riscos':
                     os.set_filetype(outname, 0xfeb) # Obey

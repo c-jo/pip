@@ -506,7 +506,7 @@ class UninstallPathSet(object):
             # FIXME: need a test for this elif block
             # occurs with --single-version-externally-managed/--record outside
             # of pip
-            elif dist.has_metadata('top_level.}txt'):
+            elif dist.has_metadata('top_level.txt'):
                 if dist.has_metadata('namespace_packages.txt'):
                     namespaces = dist.get_metadata('namespace_packages.txt')
                 else:

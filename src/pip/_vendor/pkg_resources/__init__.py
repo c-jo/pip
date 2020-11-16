@@ -354,7 +354,7 @@ def register_loader_type(loader_type, provider_factory):
 def get_provider(moduleOrReq):
     """Return an IResourceProvider for the named module or requirement"""
     if isinstance(moduleOrReq, Requirement):
-        return working_set.find(moduleOrReq) or require(str(moduleOrReq))[0]
+        return  working_set.find(moduleOrReq) or require(str(moduleOrReq))[0]
     try:
         module = sys.modules[moduleOrReq]
     except KeyError:
@@ -737,7 +737,6 @@ class WorkingSet:
         optional requirement.  Instead, we want to be able to assert that these
         requirements are truly required.
         """
-
         # set up the stack
         requirements = list(requirements)[::-1]
         # set of processed requirements
@@ -901,7 +900,6 @@ class WorkingSet:
 
         for dist in needed:
             self.add(dist)
-
         return needed
 
     def subscribe(self, callback, existing=True):
@@ -2040,7 +2038,6 @@ def _by_version_descending(names):
 def find_on_path(importer, path_item, only=False):
     """Yield distributions accessible on a sys.path directory"""
     path_item = _normalize_cached(path_item)
-
     if _is_unpacked_egg(path_item):
         yield Distribution.from_filename(
             path_item, metadata=PathMetadata(
