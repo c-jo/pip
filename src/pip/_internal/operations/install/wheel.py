@@ -46,11 +46,12 @@ if MYPY_CHECK_RUNNING:
 
 logger = logging.getLogger(__name__)
 
-
 def normpath(src, p):
     # type: (str, str) -> str
-    return os.path.relpath(src, p).replace(os.path.sep, '/')
-
+    if os.name == 'riscos':
+        return os.path.relpath(src, p).translate(str.maketrans('./','/.'))
+    else:
+        return os.path.relpath(src, p).replace(os.path.sep, '/')
 
 def rehash(path, blocksize=1 << 20):
     # type: (str, int) -> Tuple[str, str]
@@ -151,6 +152,10 @@ def message_about_scripts_not_on_PATH(scripts):
         script_name = os.path.basename(destfile)
         grouped_by_dir[parent_dir].add(script_name)
 
+    # **TODO** Add path checking on RISC OS
+    if os.name == 'riscos':
+        return None
+
     # We don't want to warn for directories that are on PATH.
     not_warn_dirs = [
         os.path.normcase(i).rstrip(os.sep) for i in
@@ -228,7 +233,7 @@ def sorted_outrows(outrows):
 
 def get_csv_rows_for_installed(
     old_csv_rows,  # type: Iterable[List[str]]
-    installed,  # type: Dict[str, str]
+    installed,  # type: Dict[str, str] (native filenames)
     changed,  # type: Set[str]
     generated,  # type: List[str]
     lib_dir,  # type: str
@@ -250,7 +255,11 @@ def get_csv_rows_for_installed(
         new_path = installed.pop(old_path, old_path)
         row[0] = new_path
         if new_path in changed:
-            digest, length = rehash(new_path)
+            if os.name == 'riscos':
+                digest, length = rehash(
+                            new_path.translate(str.maketrans('/.','./')))
+            else:
+                digest, length = rehash(new_path)
             row[1] = digest
             row[2] = length
         installed_rows.append(tuple(row))
@@ -264,7 +273,6 @@ def get_csv_rows_for_installed(
 
 class MissingCallableSuffix(Exception):
     pass
-
 
 def _raise_for_invalid_entrypoint(specification):
     # type: (str) -> None

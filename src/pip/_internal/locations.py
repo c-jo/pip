@@ -126,7 +126,10 @@ def distutils_scheme(
 
     scheme = {}
     for key in SCHEME_KEYS:
-        scheme[key] = getattr(i, 'install_' + key)
+        if os.name == 'riscos':
+            scheme[key] = os.path.canonicalise(getattr(i, 'install_' + key))
+        else:
+            scheme[key] = getattr(i, 'install_' + key)
 
     # install_lib specified in setup.cfg should install *everything*
     # into there (i.e. it takes precedence over both purelib and

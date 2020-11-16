@@ -84,14 +84,19 @@ def uninstallation_paths(dist):
     """
     r = csv.reader(FakeFile(dist.get_metadata_lines('RECORD')))
     for row in r:
-        path = os.path.join(dist.location, row[0])
+        if os.name == 'riscos':
+            path = os.path.join(
+                       dist.location,
+                       row[0].translate(str.maketrans('./','/.')))
+        else:
+            path = os.path.join(dist.location, row[0])
         yield path
-        if path.endswith(os.extsep+'py'):
+        if path.endswith(os.extsep + 'py'):
             dn, fn = os.path.split(path)
             base = fn[:-3]
-            path = os.path.join(dn, base + os.extsep+'pyc')
+            path = os.path.join(dn, base + os.extsep + 'pyc')
             yield path
-            path = os.path.join(dn, base + os.extsep+'pyo')
+            path = os.path.join(dn, base + os.extsep + 'pyo')
             yield path
 
 
@@ -150,7 +155,10 @@ def compress_for_rename(paths):
         # for the directory.
         if not (all_files - remaining):
             remaining.difference_update(all_files)
-            wildcards.add(root + os.sep)
+            if os.name == 'riscos':
+                wildcards.add(root)
+            else:
+                wildcards.add(root + os.sep)
 
     return set(map(case_map.__getitem__, remaining)) | wildcards
 
@@ -498,7 +506,7 @@ class UninstallPathSet(object):
             # FIXME: need a test for this elif block
             # occurs with --single-version-externally-managed/--record outside
             # of pip
-            elif dist.has_metadata('top_level.txt'):
+            elif dist.has_metadata('top_level.}txt'):
                 if dist.has_metadata('namespace_packages.txt'):
                     namespaces = dist.get_metadata('namespace_packages.txt')
                 else:

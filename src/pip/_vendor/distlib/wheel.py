@@ -318,7 +318,7 @@ class Wheel(object):
             size = os.path.getsize(p)
             records.append((ap, digest, size))
 
-        p = os.path.join(distinfo, 'RECORD')
+        import pdb ; pdb.set_trace()
         self.write_record(records, p, libdir)
         ap = to_posix(os.path.join(info_dir, 'RECORD'))
         archive_paths.append((ap, p))
@@ -425,6 +425,8 @@ class Wheel(object):
         ap = to_posix(os.path.join(info_dir, 'WHEEL'))
         archive_paths.append((ap, p))
 
+        import pdb ; pdb.set_trace()
+        
         # Now, at last, RECORD.
         # Paths in here are archive paths - nothing else makes sense.
         self.write_records((distinfo, info_dir), libdir, archive_paths)
@@ -669,6 +671,7 @@ class Wheel(object):
                         outfiles.append(p)
 
                     # Write RECORD
+                    import pdb ; pdb.set_trace()
                     dist.write_installed_files(outfiles, paths['prefix'],
                                                dry_run)
                 return dist

@@ -132,6 +132,8 @@ class ScriptMaker(object):
         See also: http://www.in-ulm.de/~mascheck/various/shebang/#length
                   https://hg.mozilla.org/mozilla-central/file/tip/mach
         """
+        if os.name == 'riscos':
+            return b"WimpSlot -min 8M\nRun " + executable + post_interp + b" -xxx {}\nObey\n"
         if os.name != 'posix':
             simple_shebang = True
         else:
@@ -233,7 +235,8 @@ class ScriptMaker(object):
         if not shebang.endswith(linesep):
             shebang += linesep
         if not use_launcher:
-            script_bytes = shebang + script_bytes
+            if  b'{}' not in shebang:
+                script_bytes = shebang + script_bytes
         else:  # pragma: no cover
             if ext == 'py':
                 launcher = self._get_launcher('t')
@@ -274,7 +277,13 @@ class ScriptMaker(object):
                 if os.path.exists(outname) and not self.clobber:
                     logger.warning('Skipping existing file %s', outname)
                     continue
+                if b'{}' in shebang:
+                    script_bytes = shebang.replace(
+                        b'{}', outname.encode( sys.getfilesystemencoding() ) \
+                        ) + script_bytes
                 self._fileop.write_binary_file(outname, script_bytes)
+                if os.name == 'riscos':
+                    os.set_filetype(outname, 0xfeb) # Obey
                 if self.set_mode:
                     self._fileop.set_executable_mode([outname])
             filenames.append(outname)

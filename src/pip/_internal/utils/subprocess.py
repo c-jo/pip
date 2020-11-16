@@ -180,15 +180,21 @@ def call_subprocess(
     env = os.environ.copy()
     if extra_environ:
         env.update(extra_environ)
+        print("extra_environ",extra_environ)
     for name in unset_environ:
         env.pop(name, None)
     try:
+        #print("cmd:",reveal_command_args(cmd))
+        #print("cwd:",cwd)
+        #print("env:",env)
+
         proc = subprocess.Popen(
             # Convert HiddenText objects to the underlying str.
             reveal_command_args(cmd),
-            stderr=subprocess.STDOUT, stdin=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, cwd=cwd, env=env,
         )
+
         proc.stdin.close()
     except Exception as exc:
         if log_failed_cmd:
@@ -214,7 +220,7 @@ def call_subprocess(
         proc.wait()
     finally:
         if proc.stdout:
-            proc.stdout.close()
+            pass # proc.stdout.close()
     proc_had_error = (
         proc.returncode and proc.returncode not in extra_ok_returncodes
     )

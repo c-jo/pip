@@ -52,7 +52,7 @@ def is_archive_file(name):
     # type: (str) -> bool
     """Return True if `name` is a considered as an archive file."""
     ext = splitext(name)[1].lower()
-    if ext in ARCHIVE_EXTENSIONS:
+    if ext.replace(os.extsep,'.') in ARCHIVE_EXTENSIONS:
         return True
     return False
 
@@ -191,7 +191,6 @@ class RequirementParts(object):
         self.link = link
         self.markers = markers
         self.extras = extras
-
 
 def parse_req_from_editable(editable_req):
     # type: (str) -> RequirementParts

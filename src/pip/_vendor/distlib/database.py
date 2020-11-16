@@ -683,6 +683,7 @@ class InstalledDistribution(BaseInstalledDistribution):
         base = os.path.join(base, '')
         record_path = self.get_distinfo_file('RECORD')
         logger.info('creating %s', record_path)
+        import pdb ; pdb.set_trace()
         if dry_run:
             return None
         with CSVWriter(record_path) as writer:
